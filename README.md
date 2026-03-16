@@ -1,22 +1,22 @@
-# ImgGen — Client-Side Image Generator
+# Client-Side Image Generator
 
 A single-page web application for client-side image processing. All rendering and transformations run entirely in the browser using the native Canvas API — no server uploads, no external dependencies for image manipulation.
 
-**Live Demo:** [https://motebaya.github.io/imagegen](https://motebaya.github.io/imagegen)
+**Live Demo:** [https://motebaya.github.io/cimagen](https://motebaya.github.io/cimagen)
 
 ## Features
 
 ### Thumbnail Generator
 
-Generates thumbnail images (800×400) with centered, word-wrapped text over a solid background color. Ported from `createimg.py` (Pillow). Supports 7 preset dark color palettes and a custom hex color picker.
+Generates thumbnail images (800×400) with centered, word-wrapped text over a solid background color. Supports 7 preset dark color palettes and a custom hex color picker.
 
 ### Statistic Frame Generator
 
-Overlays statistic text onto a user-uploaded image with rounded semi-transparent backgrounds and per-character stroke rendering. Ported from `statistic_frame.py` (Pillow + NumPy). Renders at the original image resolution.
+Overlays statistic text onto a user-uploaded image with rounded semi-transparent backgrounds and per-character stroke rendering. Renders at the original image resolution.
 
 ### Duotone Generator
 
-Converts images into a Pink × Green duotone effect using Rec. 709 luminance with a contrast S-curve. Ported from `green_duotone.py` (Pillow + NumPy). Supports four filter modes:
+Converts images into a Pink × Green duotone effect using Rec. 709 luminance with a contrast S-curve. Supports four filter modes:
 
 | Mode                  | Description                            |
 | --------------------- | -------------------------------------- |
@@ -58,8 +58,8 @@ Converts images into a Pink × Green duotone effect using Rec. 709 luminance wit
 
 ```bash
 # Clone the repository
-git clone https://github.com/motebaya/imagegen.git
-cd imagegen
+git clone https://github.com/motebaya/cimagen.git
+cd cimagen
 
 # Install dependencies
 npm install
@@ -68,7 +68,7 @@ npm install
 npm run dev
 ```
 
-The development server starts at `http://localhost:5173/imagegen/`.
+The development server starts at `http://localhost:5173/cimagen/`.
 
 ### Production Build
 
@@ -80,37 +80,6 @@ The optimized output is written to the `dist/` directory. To preview the product
 
 ```bash
 npm run preview
-```
-
-## Project Structure
-
-```
-src/
-├── main.jsx                        # Entry point (BrowserRouter + ThemeProvider)
-├── App.jsx                         # Root component (routing, lazy loading, font preload)
-├── index.css                       # Global styles, @font-face, CSS variables, Tailwind
-├── components/
-│   ├── Header.jsx                  # Logo + dark/light theme toggle
-│   ├── Footer.jsx                  # Footer attribution
-│   ├── ExportControls.jsx          # PNG/JPG/WEBP format selector + download button
-│   ├── HistoryPanel.jsx            # Edit history dropdown with restore/delete
-│   └── LazyImage.jsx               # IntersectionObserver lazy image loader
-├── context/
-│   └── ThemeContext.jsx            # React Context for theme + localStorage persistence
-├── hooks/
-│   ├── useEditHistory.js           # localStorage-backed edit history (max 20 entries)
-│   └── useBeforeUnload.js          # Unsaved changes warning on page leave
-├── pages/
-│   ├── Home.jsx                    # Landing page with tool cards grid
-│   ├── ThumbnailCreator.jsx        # Thumbnail generator (port of createimg.py)
-│   ├── StatisticFrameCreator.jsx   # Statistic frame generator (port of statistic_frame.py)
-│   └── DuotoneCreator.jsx          # Duotone generator (port of green_duotone.py)
-└── utils/
-    ├── thumbnailRenderer.js        # Canvas rendering: text thumbnail
-    ├── statisticFrameRenderer.js   # Canvas rendering: statistic overlay
-    ├── duotoneRenderer.js          # Canvas rendering: duotone color mapping
-    ├── fontLoader.js               # FontFace API loader with caching
-    └── exportImage.js              # Canvas → Blob export + download trigger
 ```
 
 ## License
