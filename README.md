@@ -7,22 +7,26 @@ A single-page web application for client-side image processing. All rendering an
 ## Features
 
 ### Thumbnail Generator
+
 Generates thumbnail images (800×400) with centered, word-wrapped text over a solid background color. Ported from `createimg.py` (Pillow). Supports 7 preset dark color palettes and a custom hex color picker.
 
 ### Statistic Frame Generator
+
 Overlays statistic text onto a user-uploaded image with rounded semi-transparent backgrounds and per-character stroke rendering. Ported from `statistic_frame.py` (Pillow + NumPy). Renders at the original image resolution.
 
 ### Duotone Generator
+
 Converts images into a Pink × Green duotone effect using Rec. 709 luminance with a contrast S-curve. Ported from `green_duotone.py` (Pillow + NumPy). Supports four filter modes:
 
-| Mode | Description |
-|------|-------------|
-| **Original** | Optimized shadow/highlight preset |
-| **Classic** | Classic green/pink color palette |
-| **Reverse** | Swapped shadow ↔ highlight (optimized) |
-| **Classic & Reverse** | Swapped shadow ↔ highlight (classic) |
+| Mode                  | Description                            |
+| --------------------- | -------------------------------------- |
+| **Original**          | Optimized shadow/highlight preset      |
+| **Classic**           | Classic green/pink color palette       |
+| **Reverse**           | Swapped shadow ↔ highlight (optimized) |
+| **Classic & Reverse** | Swapped shadow ↔ highlight (classic)   |
 
 ### Common Features
+
 - **Export** — Download output as PNG, JPG, or WEBP with configurable quality
 - **Live Preview** — Debounced real-time preview while editing parameters
 - **Edit History** — localStorage-backed history (up to 20 entries per tool) with restore/delete
@@ -32,16 +36,16 @@ Converts images into a Pink × Green duotone effect using Rec. 709 luminance wit
 
 ## Tech Stack
 
-| Layer | Technology |
-|-------|------------|
-| Framework | React 19 |
-| Bundler | Vite 7 |
-| Styling | TailwindCSS v4 |
-| Routing | react-router-dom v7 |
-| Icons | lucide-react |
-| Image Processing | Native Canvas API |
-| Font Loading | FontFace API |
-| Deployment | GitHub Pages via GitHub Actions |
+| Layer            | Technology                      |
+| ---------------- | ------------------------------- |
+| Framework        | React 19                        |
+| Bundler          | Vite 7                          |
+| Styling          | TailwindCSS v4                  |
+| Routing          | react-router-dom v7             |
+| Icons            | lucide-react                    |
+| Image Processing | Native Canvas API               |
+| Font Loading     | FontFace API                    |
+| Deployment       | GitHub Pages via GitHub Actions |
 
 ## Installation
 
@@ -111,8 +115,6 @@ src/
 
 ## License
 
-MIT
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
----
-
-made by [motebaya](https://github.com/motebaya)
+Made with 🍵 by [motebaya](https://github.com/motebaya)
