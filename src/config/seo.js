@@ -4,7 +4,7 @@
 
 export const seoConfig = {
   siteName: 'CimaGen - Professional Image Generator & Editor',
-  siteUrl: 'https://cimagen.com',
+  siteUrl: 'https://motebaya.github.io/cimagen',
   basePath: '/cimagen',
   defaultImage: '/cimagen/images/sample-thumbnail.webp',
   twitterHandle: '@cimagen',

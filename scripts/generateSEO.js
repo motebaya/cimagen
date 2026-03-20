@@ -8,7 +8,7 @@ const __dirname = path.dirname(__filename);
 // SEO Configuration
 const seoConfig = {
   siteName: 'CimaGen - Professional Image Generator & Editor',
-  siteUrl: 'https://cimagen.com/cimagen',
+  siteUrl: 'https://motebaya.github.io/cimagen',
   defaultImage: '/cimagen/og-image.png',
   twitterHandle: '@cimagen',
   
@@ -130,7 +130,7 @@ const seoConfig = {
 
 function generateMetaTags(page) {
   const url = page.path ? `${seoConfig.siteUrl}/${page.path}` : seoConfig.siteUrl;
-  const imageUrl = page.image ? `https://cimagen.com${page.image}` : `https://cimagen.com${seoConfig.defaultImage}`;
+  const imageUrl = page.image ? `https://motebaya.github.io${page.image}` : `https://motebaya.github.io${seoConfig.defaultImage}`;
   
   return `
     <!-- Primary Meta Tags -->
