@@ -179,14 +179,15 @@ function generateMetaTags(page) {
   `;
 }
 
-function generateHTML(page) {
+function generateHTML(page, linkTags, scriptTags) {
   return `<!doctype html>
 <html lang="en">
   <head>${generateMetaTags(page)}
+    ${linkTags}
   </head>
   <body>
     <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
+    ${scriptTags}
   </body>
 </html>
 `;
@@ -203,9 +204,32 @@ if (!fs.existsSync(distDir)) {
 
 console.log('Generating static HTML files with SEO meta tags...\n');
 
+// Read the Vite-built index.html to extract script and link tags
+const viteIndexPath = path.join(distDir, 'index.html');
+let scriptTags = '<script type="module" crossorigin src="/cimagen/assets/index-HASH.js"></script>';
+let linkTags = '';
+
+if (fs.existsSync(viteIndexPath)) {
+  const viteHTML = fs.readFileSync(viteIndexPath, 'utf-8');
+  
+  // Extract link tags (CSS)
+  const linkMatch = viteHTML.match(/<link[^>]*rel="stylesheet"[^>]*>/g);
+  if (linkMatch) {
+    linkTags = linkMatch.join('\n    ');
+  }
+  
+  // Extract script tags
+  const scriptMatch = viteHTML.match(/<script[^>]*>[\s\S]*?<\/script>|<script[^>]*\/>/g);
+  if (scriptMatch) {
+    // Filter out JSON-LD scripts (we'll add our own)
+    const jsScripts = scriptMatch.filter(tag => !tag.includes('application/ld+json'));
+    scriptTags = jsScripts.join('\n    ');
+  }
+}
+
 // Generate index.html for home
 const homePage = seoConfig.pages.home;
-const homeHTML = generateHTML(homePage);
+const homeHTML = generateHTML(homePage, linkTags, scriptTags);
 fs.writeFileSync(path.join(distDir, 'index.html'), homeHTML);
 console.log('✓ Generated: index.html (Home)');
 
@@ -221,7 +245,7 @@ Object.entries(seoConfig.pages).forEach(([key, page]) => {
   }
   
   // Generate HTML file
-  const html = generateHTML(page);
+  const html = generateHTML(page, linkTags, scriptTags);
   fs.writeFileSync(path.join(routeDir, 'index.html'), html);
   console.log(`✓ Generated: ${page.path}/index.html`);
 });
