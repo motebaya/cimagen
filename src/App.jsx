@@ -1,38 +1,57 @@
-import { lazy, Suspense, useEffect } from 'react'
-import { Routes, Route, Link } from 'react-router-dom'
-import Header from './components/Header.jsx'
-import Footer from './components/Footer.jsx'
-import { loadAllFonts } from './utils/fontLoader.js'
+import { lazy, Suspense, useEffect } from "react";
+import { Routes, Route, Link } from "react-router-dom";
+import Header from "./components/Header.jsx";
+import Footer from "./components/Footer.jsx";
+import { loadAllFonts } from "./utils/fontLoader.js";
 
-const Home = lazy(() => import('./pages/Home.jsx'))
-const ThumbnailCreator = lazy(() => import('./pages/ThumbnailCreator.jsx'))
-const StatisticFrameCreator = lazy(() => import('./pages/StatisticFrameCreator.jsx'))
-const DuotoneCreator = lazy(() => import('./pages/DuotoneCreator.jsx'))
+const Home = lazy(() => import("./pages/Home.jsx"));
+const ThumbnailCreator = lazy(() => import("./pages/ThumbnailCreator.jsx"));
+const StatisticFrameCreator = lazy(
+  () => import("./pages/StatisticFrameCreator.jsx"),
+);
+const DuotoneCreator = lazy(() => import("./pages/DuotoneCreator.jsx"));
+const MetadataViewer = lazy(() => import("./pages/MetadataViewer.jsx"));
+const BlackpinkCreator = lazy(() => import("./pages/BlackpinkCreator.jsx"));
+const WastedCreator = lazy(() => import("./pages/WastedCreator.jsx"));
+const PhLogoCreator = lazy(() => import("./pages/PhLogoCreator.jsx"));
+const PaperWriterCreator = lazy(() => import("./pages/PaperWriterCreator.jsx"));
+const PokemonCardCreator = lazy(() => import("./pages/PokemonCardCreator.jsx"));
+const IcoConverter = lazy(() => import("./pages/IcoConverter.jsx"));
+const PdfConverter = lazy(() => import("./pages/PdfConverter.jsx"));
+const SvgConverter = lazy(() => import("./pages/SvgConverter.jsx"));
+const LowResGenerator = lazy(() => import("./pages/LowResGenerator.jsx"));
+const OcrReader = lazy(() => import("./pages/OcrReader.jsx"));
+const AppIconGenerator = lazy(() => import("./pages/AppIconGenerator.jsx"));
 
 function NotFound() {
   return (
     <div className="flex-1 flex items-center justify-center animate-fade-in">
       <div className="flex flex-col items-center gap-4 text-center px-4">
-        <h1 className="text-6xl font-bold m-0" style={{ color: 'var(--text-primary)' }}>404</h1>
-        <p className="text-lg m-0" style={{ color: 'var(--text-secondary)' }}>
+        <h1
+          className="text-6xl font-bold m-0"
+          style={{ color: "var(--text-primary)" }}
+        >
+          404
+        </h1>
+        <p className="text-lg m-0" style={{ color: "var(--text-secondary)" }}>
           Page not found
         </p>
-        <p className="text-sm m-0" style={{ color: 'var(--text-tertiary)' }}>
+        <p className="text-sm m-0" style={{ color: "var(--text-tertiary)" }}>
           The page you're looking for doesn't exist or has been moved.
         </p>
         <Link
           to="/"
           className="mt-2 px-5 py-2.5 rounded-lg text-sm font-medium no-underline transition-colors"
           style={{
-            backgroundColor: 'var(--color-primary-500)',
-            color: '#fff',
+            backgroundColor: "var(--color-primary-500)",
+            color: "#fff",
           }}
         >
           Back to Home
         </Link>
       </div>
     </div>
-  )
+  );
 }
 
 function LoadingFallback() {
@@ -41,21 +60,26 @@ function LoadingFallback() {
       <div className="flex flex-col items-center gap-3">
         <div
           className="w-8 h-8 border-3 border-t-transparent rounded-full animate-spin"
-          style={{ borderColor: 'var(--border-color)', borderTopColor: 'transparent' }}
+          style={{
+            borderColor: "var(--border-color)",
+            borderTopColor: "transparent",
+          }}
         />
-        <p style={{ color: 'var(--text-tertiary)' }} className="text-sm">Loading...</p>
+        <p style={{ color: "var(--text-tertiary)" }} className="text-sm">
+          Loading...
+        </p>
       </div>
     </div>
-  )
+  );
 }
 
 export default function App() {
   // Preload fonts on app init so they're ready when user navigates to a creator page
   useEffect(() => {
     loadAllFonts().catch((err) => {
-      console.warn('Font preloading failed (fonts will load on demand):', err)
-    })
-  }, [])
+      console.warn("Font preloading failed (fonts will load on demand):", err);
+    });
+  }, []);
 
   return (
     <>
@@ -65,13 +89,34 @@ export default function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/thumbnail-creator" element={<ThumbnailCreator />} />
-            <Route path="/statistic-frame-creator" element={<StatisticFrameCreator />} />
+            <Route
+              path="/statistic-frame-creator"
+              element={<StatisticFrameCreator />}
+            />
             <Route path="/duotone-creator" element={<DuotoneCreator />} />
+            <Route path="/metadata-viewer" element={<MetadataViewer />} />
+            <Route path="/blackpink-creator" element={<BlackpinkCreator />} />
+            <Route path="/wasted-creator" element={<WastedCreator />} />
+            <Route path="/phlogo-creator" element={<PhLogoCreator />} />
+            <Route
+              path="/paperwriter-creator"
+              element={<PaperWriterCreator />}
+            />
+            <Route
+              path="/pokemon-card-creator"
+              element={<PokemonCardCreator />}
+            />
+            <Route path="/ico-converter" element={<IcoConverter />} />
+            <Route path="/pdf-converter" element={<PdfConverter />} />
+            <Route path="/svg-converter" element={<SvgConverter />} />
+            <Route path="/lowres-generator" element={<LowResGenerator />} />
+            <Route path="/ocr-reader" element={<OcrReader />} />
+            <Route path="/app-icon-generator" element={<AppIconGenerator />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>
       </main>
       <Footer />
     </>
-  )
+  );
 }
