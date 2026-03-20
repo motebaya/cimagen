@@ -1,9 +1,6 @@
-/**
- * Metadata extraction utilities
- * Uses exifr library and exif-js as fallback
- */
-
+import exif from "exif-reader";
 import exifr from "exifr";
+import ExifReader from "exifreader";
 
 /**
  * Enum defining available metadata extraction methods.
@@ -11,10 +8,15 @@ import exifr from "exifr";
  * @enum {string}
  */
 export const MetadataMethod = {
-  /** Modern exifr library with comprehensive format support */
   EXIFR: "exifr",
-  /** Legacy exif-js library for compatibility */
-  EXIF_JS: "exif-js",
+  EXIF_READER: "exif-reader",
+  EXIFREADER: "exifreader",
+};
+
+export const MetadataMethodLabel = {
+  [MetadataMethod.EXIFR]: "exifr",
+  [MetadataMethod.EXIF_READER]: "exif-reader",
+  [MetadataMethod.EXIFREADER]: "exifreader",
 };
 
 /**
@@ -22,7 +24,7 @@ export const MetadataMethod = {
  * Returns structured metadata including GPS and camera information detection.
  *
  * @param {File} file - Image file to extract metadata from
- * @param {string} [method=MetadataMethod.EXIFR] - Extraction method: 'exifr' or 'exif-js'
+ * @param {string} [method=MetadataMethod.EXIFR] - Extraction method identifier
  * @returns {Promise<Object>} Object containing success status, extracted data, method used, and boolean flags for GPS/camera presence
  * @returns {boolean} return.success - Whether extraction succeeded
  * @returns {Object} return.data - Extracted metadata key-value pairs
@@ -32,10 +34,15 @@ export const MetadataMethod = {
  * @returns {string} [return.error] - Error message if extraction failed
  */
 export async function extractMetadata(file, method = MetadataMethod.EXIFR) {
-  if (method === MetadataMethod.EXIFR) {
-    return await extractWithExifr(file);
-  } else {
-    return await extractWithExifJs(file);
+  switch (method) {
+    case MetadataMethod.EXIFR:
+      return extractWithExifr(file);
+    case MetadataMethod.EXIF_READER:
+      return extractWithExifReader(file);
+    case MetadataMethod.EXIFREADER:
+      return extractWithExifReaderJs(file);
+    default:
+      return buildErrorResult(method, `Unsupported metadata method: ${method}`);
   }
 }
 
@@ -48,147 +55,303 @@ export async function extractMetadata(file, method = MetadataMethod.EXIFR) {
  */
 async function extractWithExifr(file) {
   try {
-    // Parse everything - all segments and blocks
     const data = await exifr.parse(file, true);
-
-    return {
-      success: true,
-      data: data || {},
-      method: "exifr",
-      hasGPS: !!(data?.latitude && data?.longitude),
-      hasCamera: !!(data?.Make || data?.Model),
-    };
+    return buildSuccessResult(MetadataMethod.EXIFR, sanitizeForJson(data) ?? {}, {
+      gps: extractGpsFromExifr(data),
+      hasCamera: hasCameraInfo(data),
+    });
   } catch (error) {
-    return {
-      success: false,
-      error: error.message,
-      method: "exifr",
-      data: {},
-    };
+    return buildErrorResult(MetadataMethod.EXIFR, error.message);
   }
 }
 
-/**
- * Extracts metadata using the legacy exif-js library.
- * Dynamically loads exif-js script from public directory if not already loaded.
- *
- * @param {File} file - Image file to extract metadata from
- * @returns {Promise<Object>} Extraction result with success status, data, and detection flags
- */
-async function extractWithExifJs(file) {
-  return new Promise((resolve) => {
-    // Load exif-js from public directory
-    if (!window.EXIF) {
-      const script = document.createElement("script");
-      script.src = `${import.meta.env.BASE_URL}exif-js.js`;
-      script.onload = () => processWithExifJs(file, resolve);
-      script.onerror = () =>
-        resolve({
-          success: false,
-          error: "Failed to load exif-js library",
-          method: "exif-js",
-          data: {},
-        });
-      document.head.appendChild(script);
-    } else {
-      processWithExifJs(file, resolve);
+async function extractWithExifReader(file) {
+  try {
+    const arrayBuffer = await file.arrayBuffer();
+    const rawExifBuffer = extractRawExifBuffer(arrayBuffer);
+
+    if (rawExifBuffer == null) {
+      return buildErrorResult(
+        MetadataMethod.EXIF_READER,
+        "No raw EXIF APP1 segment found in this image.",
+      );
     }
+
+    const data = exif(rawExifBuffer);
+    return buildSuccessResult(
+      MetadataMethod.EXIF_READER,
+      sanitizeForJson(data) ?? {},
+      {
+        gps: extractGpsFromExifReader(data),
+        hasCamera: hasCameraInfo(data?.Image) || hasCameraInfo(data?.Photo),
+      },
+    );
+  } catch (error) {
+    return buildErrorResult(MetadataMethod.EXIF_READER, error.message);
+  }
+}
+
+async function extractWithExifReaderJs(file) {
+  try {
+    const data = await ExifReader.load(file, {
+      expanded: true,
+      async: true,
+      includeUnknown: true,
+      computed: true,
+    });
+
+    return buildSuccessResult(
+      MetadataMethod.EXIFREADER,
+      sanitizeForJson(data) ?? {},
+      {
+        gps: extractGpsFromExifReaderJs(data),
+        hasCamera: hasExifReaderJsCameraInfo(data),
+      },
+    );
+  } catch (error) {
+    return buildErrorResult(MetadataMethod.EXIFREADER, error.message);
+  }
+}
+
+function buildSuccessResult(method, data, options = {}) {
+  const gps = normalizeGps(options.gps);
+  return {
+    success: true,
+    data,
+    method,
+    hasGPS: gps != null,
+    hasCamera: options.hasCamera ?? hasCameraInfo(data),
+    gps,
+    fieldCount: countMetadataFields(data),
+  };
+}
+
+function buildErrorResult(method, error) {
+  return {
+    success: false,
+    error,
+    method,
+    data: {},
+    hasGPS: false,
+    hasCamera: false,
+    gps: null,
+    fieldCount: 0,
+  };
+}
+
+function sanitizeForJson(value) {
+  if (value == null) {
+    return value;
+  }
+
+  if (value instanceof Date) {
+    return value.toISOString();
+  }
+
+  if (Array.isArray(value)) {
+    return value.map((item) => sanitizeForJson(item));
+  }
+
+  if (ArrayBuffer.isView(value)) {
+    return Array.from(value);
+  }
+
+  if (value instanceof ArrayBuffer) {
+    return Array.from(new Uint8Array(value));
+  }
+
+  if (typeof value === "object") {
+    return Object.fromEntries(
+      Object.entries(value).map(([key, nestedValue]) => [
+        key,
+        sanitizeForJson(nestedValue),
+      ]),
+    );
+  }
+
+  return value;
+}
+
+function extractRawExifBuffer(arrayBuffer) {
+  const bytes = new Uint8Array(arrayBuffer);
+
+  if (bytes.length < 4 || bytes[0] !== 0xff || bytes[1] !== 0xd8) {
+    return null;
+  }
+
+  let offset = 2;
+  while (offset + 4 <= bytes.length) {
+    if (bytes[offset] !== 0xff) {
+      return null;
+    }
+
+    const marker = bytes[offset + 1];
+    if (marker === 0xda || marker === 0xd9) {
+      return null;
+    }
+
+    const segmentLength = (bytes[offset + 2] << 8) | bytes[offset + 3];
+    const segmentStart = offset + 4;
+    const segmentEnd = segmentStart + segmentLength - 2;
+
+    if (segmentEnd > bytes.length) {
+      return null;
+    }
+
+    if (
+      marker === 0xe1 &&
+      segmentLength >= 8 &&
+      bytes[segmentStart] === 0x45 &&
+      bytes[segmentStart + 1] === 0x78 &&
+      bytes[segmentStart + 2] === 0x69 &&
+      bytes[segmentStart + 3] === 0x66 &&
+      bytes[segmentStart + 4] === 0x00 &&
+      bytes[segmentStart + 5] === 0x00
+    ) {
+      return bytes.slice(segmentStart + 6, segmentEnd).buffer;
+    }
+
+    offset += 2 + segmentLength;
+  }
+
+  return null;
+}
+
+function extractGpsFromExifr(data) {
+  return normalizeGps({
+    latitude: data?.latitude,
+    longitude: data?.longitude,
   });
 }
 
-/**
- * Processes image file with exif-js library after script is loaded.
- * Reads file as data URL, loads into image element, and extracts all EXIF tags.
- *
- * @param {File} file - Image file to process
- * @param {Function} resolve - Promise resolve callback
- */
-function processWithExifJs(file, resolve) {
-  const reader = new FileReader();
+function extractGpsFromExifReader(data) {
+  const gps = data?.GPSInfo;
+  if (gps == null) {
+    return null;
+  }
 
-  reader.onload = (e) => {
-    const img = new Image();
-    img.onload = () => {
-      try {
-        // Give the image time to fully load before extracting
-        setTimeout(() => {
-          if (!window.EXIF) {
-            resolve({
-              success: false,
-              error: "EXIF library not loaded",
-              method: "exif-js",
-              data: {},
-            });
-            return;
-          }
+  return normalizeGps({
+    latitude: dmsToDecimal(gps.GPSLatitude, gps.GPSLatitudeRef),
+    longitude: dmsToDecimal(gps.GPSLongitude, gps.GPSLongitudeRef),
+  });
+}
 
-          window.EXIF.getData(img, function () {
-            try {
-              const allTags = window.EXIF.getAllTags(this);
+function extractGpsFromExifReaderJs(data) {
+  const gps = data?.gps;
+  if (gps == null) {
+    return null;
+  }
 
-              // Check if we got any tags
-              if (!allTags || Object.keys(allTags).length === 0) {
-                resolve({
-                  success: false,
-                  error: "No EXIF data found in image",
-                  method: "exif-js",
-                  data: {},
-                });
-                return;
-              }
+  return normalizeGps({
+    latitude: extractTagNumber(gps.Latitude),
+    longitude: extractTagNumber(gps.Longitude),
+  });
+}
 
-              const hasGPS = !!(allTags.GPSLatitude || allTags.GPSLongitude);
-              const hasCamera = !!(allTags.Make || allTags.Model);
+function hasExifReaderJsCameraInfo(data) {
+  return [data?.exif, data?.xmp, data?.makerNotes, data?.file].some((group) =>
+    hasCameraInfo(group),
+  );
+}
 
-              resolve({
-                success: true,
-                data: allTags,
-                method: "exif-js",
-                hasGPS,
-                hasCamera,
-              });
-            } catch (err) {
-              console.error("Error getting EXIF tags:", err);
-              resolve({
-                success: false,
-                error: "Failed to extract EXIF tags",
-                method: "exif-js",
-                data: {},
-              });
-            }
-          });
-        }, 100);
-      } catch (err) {
-        console.error("Error in EXIF.getData:", err);
-        resolve({
-          success: false,
-          error: "Failed to extract metadata with exif-js",
-          method: "exif-js",
-          data: {},
-        });
-      }
-    };
-    img.onerror = () => {
-      resolve({
-        success: false,
-        error: "Failed to load image",
-        method: "exif-js",
-        data: {},
-      });
-    };
-    img.src = e.target.result;
-  };
+function hasCameraInfo(data) {
+  if (data == null || typeof data !== "object") {
+    return false;
+  }
 
-  reader.onerror = () => {
-    resolve({
-      success: false,
-      error: "Failed to read file",
-      method: "exif-js",
-      data: {},
-    });
-  };
+  return [
+    data.Make,
+    data.Model,
+    data.LensModel,
+    data["Make"],
+    data["Model"],
+    data["Lens Model"],
+  ].some((value) => value != null);
+}
 
-  reader.readAsDataURL(file);
+function normalizeGps(gps) {
+  const latitude = parseCoordinateValue(gps?.latitude);
+  const longitude = parseCoordinateValue(gps?.longitude);
+
+  if (latitude == null || longitude == null) {
+    return null;
+  }
+
+  return { latitude, longitude };
+}
+
+function extractTagNumber(tag) {
+  if (tag == null) {
+    return null;
+  }
+
+  return parseCoordinateValue(tag.computed ?? tag.value ?? tag.description ?? tag);
+}
+
+function parseCoordinateValue(value) {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return value;
+  }
+
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    const numeric = Number(trimmed);
+    if (Number.isFinite(numeric)) {
+      return numeric;
+    }
+
+    const dmsMatch = trimmed.match(
+      /(-?\d+(?:\.\d+)?)\s*(?:deg|°)\s*(\d+(?:\.\d+)?)?'?\s*(\d+(?:\.\d+)?)?"?\s*([NSEW])?/i,
+    );
+    if (dmsMatch != null) {
+      const degrees = Number(dmsMatch[1]);
+      const minutes = Number(dmsMatch[2] ?? 0);
+      const seconds = Number(dmsMatch[3] ?? 0);
+      const ref = dmsMatch[4]?.toUpperCase();
+      const absolute = Math.abs(degrees) + minutes / 60 + seconds / 3600;
+      const sign = degrees < 0 || ref === "S" || ref === "W" ? -1 : 1;
+      return absolute * sign;
+    }
+  }
+
+  return null;
+}
+
+function dmsToDecimal(values, ref) {
+  if (!Array.isArray(values) || values.length === 0) {
+    return null;
+  }
+
+  const [degrees = 0, minutes = 0, seconds = 0] = values.map(Number);
+  if (
+    !Number.isFinite(degrees) ||
+    !Number.isFinite(minutes) ||
+    !Number.isFinite(seconds)
+  ) {
+    return null;
+  }
+
+  const decimal = degrees + minutes / 60 + seconds / 3600;
+  return ref === "S" || ref === "W" ? -decimal : decimal;
+}
+
+function countMetadataFields(value) {
+  if (value == null) {
+    return 0;
+  }
+
+  if (Array.isArray(value)) {
+    return value.reduce((total, item) => total + countMetadataFields(item), 0);
+  }
+
+  if (typeof value === "object") {
+    return Object.values(value).reduce(
+      (total, item) => total + countMetadataFields(item),
+      Object.keys(value).length,
+    );
+  }
+
+  return 1;
 }
 
 /**
@@ -227,14 +390,6 @@ function formatValue(value) {
   return String(value);
 }
 
-/**
- * Removes all metadata from an image file by re-rendering to canvas.
- * Creates a clean copy without EXIF, GPS, or other embedded metadata.
- *
- * @param {File} file - Image file to strip metadata from
- * @returns {Promise<Blob>} Blob containing the cleaned image data
- * @throws {Error} If image loading or blob creation fails
- */
 /**
  * Removes all metadata from an image file by re-rendering to canvas.
  * Creates a clean copy without EXIF, GPS, or other embedded metadata.
