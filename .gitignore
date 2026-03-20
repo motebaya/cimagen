@@ -33,3 +33,18 @@ __pycache__/
 
 # Development artifacts
 trash/**/*
+prompt.txt
+prompt-en.txt
+statistik.png
+
+# Python reference implementations and test directories (not needed for deployment)
+exifr/
+exif-js/
+drawHub/
+blackpink/
+wasted/
+tulis-module/
+pocard/
+createimg.py
+green_duotone.py
+statistic_frame.py
