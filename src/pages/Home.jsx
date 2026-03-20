@@ -176,8 +176,9 @@ export default function Home() {
             className="text-lg max-w-2xl mx-auto"
             style={{ color: "var(--text-secondary)" }}
           >
-            Client-side Image processing tools. Everything runs in your browser,
-            no uploads, no servers. More than 14 image tools are ready to use.
+            Client-side Image processing tools and Generator. Everything runs in
+            your browser, no uploads, no servers. More than 14 image tools are
+            ready to use.
           </p>
         </div>
 

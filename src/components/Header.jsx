@@ -26,7 +26,7 @@ export default function Header() {
               className="text-lg font-semibold tracking-tight"
               style={{ color: "var(--text-primary)" }}
             >
-              ImgGen
+              CimaGen
             </span>
           </Link>
 
