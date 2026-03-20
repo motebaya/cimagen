@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
 import { Link } from "react-router-dom";
+import { CircleMarker, MapContainer, Popup, TileLayer } from "react-leaflet";
 import {
   ArrowLeft,
   Upload,
@@ -10,6 +11,8 @@ import {
   Download,
   MapPin,
   Camera,
+  Play,
+  ExternalLink,
   FileX,
   CheckCircle,
   Loader2,
@@ -18,10 +21,12 @@ import {
 import {
   extractMetadata,
   MetadataMethod,
+  MetadataMethodLabel,
   formatMetadataAsText,
   removeMetadata,
   downloadMetadataAsText,
 } from "../utils/metadataExtractor.js";
+import "leaflet/dist/leaflet.css";
 
 export default function MetadataViewer() {
   const [imageSrc, setImageSrc] = useState(null);
@@ -61,9 +66,6 @@ export default function MetadataViewer() {
       setError("Failed to read the file. Please try again.");
     };
     reader.readAsDataURL(file);
-
-    // Auto-extract metadata
-    await handleExtract(file, method);
   };
 
   const handleDrop = (e) => {
@@ -106,11 +108,18 @@ export default function MetadataViewer() {
     }
   };
 
-  const handleMethodChange = async (newMethod) => {
+  const handleMethodChange = (newMethod) => {
     setMethod(newMethod);
-    if (imageFile) {
-      await handleExtract(imageFile, newMethod);
-    }
+  };
+
+  const handleOpenInGoogleMaps = () => {
+    if (!metadata?.gps) return;
+    const { latitude, longitude } = metadata.gps;
+    window.open(
+      `https://www.google.com/maps?q=${latitude},${longitude}`,
+      "_blank",
+      "noopener,noreferrer",
+    );
   };
 
   const handleCopyJSON = () => {
@@ -167,6 +176,10 @@ export default function MetadataViewer() {
   };
 
   const hasMetadata = metadata && Object.keys(metadata.data).length > 0;
+  const activeMethodLabel = MetadataMethodLabel[method] || method;
+  const mapPosition = metadata?.gps
+    ? [metadata.gps.latitude, metadata.gps.longitude]
+    : null;
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in">
@@ -197,7 +210,7 @@ export default function MetadataViewer() {
           Image Metadata Viewer
         </h1>
         <p className="text-sm" style={{ color: "var(--text-tertiary)" }}>
-          Extract and view EXIF metadata from your images
+          Choose a parser, then run extraction to inspect structured metadata.
         </p>
       </div>
 
@@ -311,7 +324,7 @@ export default function MetadataViewer() {
             <input
               ref={fileInputRef}
               type="file"
-              accept="image/*"
+              accept=".jpg,.jpeg,.png,.webp,.gif,.tif,.tiff,.heic,.heif,.avif"
               onChange={(e) => handleFileSelect(e.target.files[0])}
               className="hidden"
             />
@@ -326,10 +339,9 @@ export default function MetadataViewer() {
               >
                 Extraction Method
               </label>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <button
                   onClick={() => handleMethodChange(MetadataMethod.EXIFR)}
-                  disabled={isExtracting}
                   className="px-4 py-2 rounded-lg text-sm font-medium transition-all border-none cursor-pointer disabled:opacity-50"
                   style={{
                     backgroundColor:
@@ -342,26 +354,63 @@ export default function MetadataViewer() {
                         : "var(--text-primary)",
                   }}
                 >
-                  exifr (Modern)
+                  exifr
                 </button>
                 <button
-                  onClick={() => handleMethodChange(MetadataMethod.EXIF_JS)}
-                  disabled={isExtracting}
+                  onClick={() => handleMethodChange(MetadataMethod.EXIF_READER)}
                   className="px-4 py-2 rounded-lg text-sm font-medium transition-all border-none cursor-pointer disabled:opacity-50"
                   style={{
                     backgroundColor:
-                      method === MetadataMethod.EXIF_JS
+                      method === MetadataMethod.EXIF_READER
                         ? "var(--color-primary-600)"
                         : "var(--bg-tertiary)",
                     color:
-                      method === MetadataMethod.EXIF_JS
+                      method === MetadataMethod.EXIF_READER
                         ? "#fff"
                         : "var(--text-primary)",
                   }}
                 >
-                  exif-js (Legacy)
+                  exif-reader
+                </button>
+                <button
+                  onClick={() => handleMethodChange(MetadataMethod.EXIFREADER)}
+                  className="px-4 py-2 rounded-lg text-sm font-medium transition-all border-none cursor-pointer disabled:opacity-50"
+                  style={{
+                    backgroundColor:
+                      method === MetadataMethod.EXIFREADER
+                        ? "var(--color-primary-600)"
+                        : "var(--bg-tertiary)",
+                    color:
+                      method === MetadataMethod.EXIFREADER
+                        ? "#fff"
+                        : "var(--text-primary)",
+                  }}
+                >
+                  exifreader
                 </button>
               </div>
+              <button
+                onClick={() => handleExtract()}
+                disabled={isExtracting || !imageFile}
+                className="mt-3 w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all border-none cursor-pointer disabled:opacity-50"
+                style={{
+                  backgroundColor: "var(--color-primary-600)",
+                  color: "#fff",
+                }}
+              >
+                {isExtracting ? (
+                  <Loader2 size={16} className="animate-spin" />
+                ) : (
+                  <Play size={16} />
+                )}
+                Extract with {activeMethodLabel}
+              </button>
+              <p
+                className="text-xs mt-2"
+                style={{ color: "var(--text-tertiary)" }}
+              >
+                Extraction runs only when you click the action button.
+              </p>
             </div>
           )}
         </div>
@@ -396,7 +445,7 @@ export default function MetadataViewer() {
                     className="text-sm m-0"
                     style={{ color: "var(--text-tertiary)" }}
                   >
-                    Extracting metadata...
+                    Extracting with {activeMethodLabel}...
                   </p>
                 </div>
               ) : hasMetadata ? (
@@ -429,7 +478,7 @@ export default function MetadataViewer() {
                     style={{ color: "var(--text-tertiary)" }}
                   >
                     {imageSrc
-                      ? "No metadata found"
+                      ? "Select a method and run extraction"
                       : "Upload an image to view metadata"}
                   </p>
                 </div>
@@ -442,10 +491,74 @@ export default function MetadataViewer() {
                 style={{ color: "var(--text-tertiary)" }}
               >
                 Metadata extracted using{" "}
-                {method === MetadataMethod.EXIFR ? "exifr" : "exif-js"}
+                {metadata?.method
+                  ? MetadataMethodLabel[metadata.method] || metadata.method
+                  : activeMethodLabel}
               </p>
             )}
           </div>
+
+          {mapPosition && (
+            <div
+              className="rounded-xl border overflow-hidden animate-fade-in"
+              style={{
+                borderColor: "var(--border-color)",
+                boxShadow: "var(--card-shadow)",
+              }}
+            >
+              <div
+                className="px-4 py-3 flex items-center justify-between gap-3"
+                style={{ backgroundColor: "var(--bg-tertiary)" }}
+              >
+                <div className="flex items-center gap-2">
+                  <MapPin size={16} style={{ color: "var(--text-secondary)" }} />
+                  <span
+                    className="text-sm font-medium"
+                    style={{ color: "var(--text-primary)" }}
+                  >
+                    GPS Location
+                  </span>
+                </div>
+                <button
+                  onClick={handleOpenInGoogleMaps}
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium border-none cursor-pointer"
+                  style={{
+                    backgroundColor: "var(--bg-secondary)",
+                    color: "var(--text-primary)",
+                  }}
+                >
+                  <ExternalLink size={14} />
+                  Go
+                </button>
+              </div>
+              <div className="h-72 w-full">
+                <MapContainer
+                  center={mapPosition}
+                  zoom={13}
+                  scrollWheelZoom={false}
+                  className="h-full w-full"
+                >
+                  <TileLayer
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  />
+                  <CircleMarker
+                    center={mapPosition}
+                    radius={10}
+                    pathOptions={{
+                      color: "#2563eb",
+                      fillColor: "#3b82f6",
+                      fillOpacity: 0.75,
+                    }}
+                  >
+                    <Popup>
+                      {metadata.gps.latitude.toFixed(6)}, {metadata.gps.longitude.toFixed(6)}
+                    </Popup>
+                  </CircleMarker>
+                </MapContainer>
+              </div>
+            </div>
+          )}
 
           {/* Metadata info */}
           {hasMetadata && (
@@ -473,7 +586,7 @@ export default function MetadataViewer() {
                     color: "var(--text-secondary)",
                   }}
                 >
-                  {Object.keys(metadata.data).length} fields
+                  {metadata.fieldCount} fields
                 </span>
                 {metadata.hasGPS && (
                   <span
