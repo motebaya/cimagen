@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>OG Image Generator</title>
+</head>
+<body>
+    <canvas id="canvas" width="1200" height="630"></canvas>
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Background gradient
+        const gradient = ctx.createLinearGradient(0, 0, 1200, 630);
+        gradient.addColorStop(0, '#4c6ef5');
+        gradient.addColorStop(1, '#364fc7');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, 1200, 630);
+        
+        // Add pattern overlay
+        ctx.globalAlpha = 0.1;
+        for (let i = 0; i < 50; i++) {
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.arc(Math.random() * 1200, Math.random() * 630, Math.random() * 3, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+        
+        // Icon
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(100, 200, 200, 200);
+        ctx.fillStyle = '#4c6ef5';
+        ctx.beginPath();
+        ctx.moveTo(150, 350);
+        ctx.lineTo(200, 280);
+        ctx.lineTo(240, 330);
+        ctx.lineTo(270, 290);
+        ctx.lineTo(300, 350);
+        ctx.lineTo(150, 350);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(260, 260, 25, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Text
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 80px Arial';
+        ctx.fillText('CimaGen', 350, 280);
+        
+        ctx.font = '40px Arial';
+        ctx.fillText('Professional Image Tools', 350, 350);
+        
+        ctx.font = '30px Arial';
+        ctx.globalAlpha = 0.9;
+        ctx.fillText('Free • Fast • Client-Side Processing', 350, 410);
+        
+        // Download
+        setTimeout(() => {
+            const link = document.createElement('a');
+            link.download = 'og-image.png';
+            link.href = canvas.toDataURL();
+            link.click();
+            document.body.innerHTML = '<h1>OG Image generated! Check your downloads.</h1>';
+        }, 100);
+    </script>
+</body>
+</html>
