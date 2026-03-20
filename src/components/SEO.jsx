@@ -6,6 +6,7 @@ export default function SEO({ pageKey = 'home', customTitle, customDescription }
   const title = customTitle || page.title;
   const description = customDescription || page.description;
   const url = `${seoConfig.siteUrl}${pageKey === 'home' ? '' : `/${pageKey}`}`;
+  const imageUrl = page.image ? `${seoConfig.siteUrl}${page.image}` : `${seoConfig.siteUrl}${seoConfig.defaultImage}`;
   const structuredData = generateStructuredData(pageKey);
 
   return (
@@ -25,7 +26,7 @@ export default function SEO({ pageKey = 'home', customTitle, customDescription }
       <meta property="og:url" content={url} />
       <meta property="og:title" content={title} />
       <meta property="og:description" content={description} />
-      <meta property="og:image" content={`${seoConfig.siteUrl}${seoConfig.defaultImage}`} />
+      <meta property="og:image" content={imageUrl} />
       <meta property="og:site_name" content={seoConfig.siteName} />
       
       {/* Twitter */}
@@ -33,7 +34,7 @@ export default function SEO({ pageKey = 'home', customTitle, customDescription }
       <meta property="twitter:url" content={url} />
       <meta property="twitter:title" content={title} />
       <meta property="twitter:description" content={description} />
-      <meta property="twitter:image" content={`${seoConfig.siteUrl}${seoConfig.defaultImage}`} />
+      <meta property="twitter:image" content={imageUrl} />
       <meta property="twitter:creator" content={seoConfig.twitterHandle} />
       
       {/* Additional Meta Tags */}
