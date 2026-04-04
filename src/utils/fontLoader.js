@@ -30,5 +30,8 @@ export async function loadAllFonts() {
   await Promise.all([
     loadFont("SpaceGrotesk", `${BASE}fonts/SpaceGrotesk-Regular.ttf`),
     loadFont("HelveticaLTStd", `${BASE}fonts/HelveticaLTStd-Comp.otf`),
+    loadFont("DMSansBrand", `${BASE}fonts/DMSans_18pt-SemiBold.ttf`),
+    loadFont("DatatypeHero", `${BASE}fonts/Datatype_SemiExpanded-Bold.ttf`),
+    loadFont("InkfreeBrand", `${BASE}fonts/Inkfree.ttf`),
   ]);
 }
