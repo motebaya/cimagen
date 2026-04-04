@@ -56,10 +56,14 @@ export async function extractMetadata(file, method = MetadataMethod.EXIFR) {
 async function extractWithExifr(file) {
   try {
     const data = await exifr.parse(file, true);
-    return buildSuccessResult(MetadataMethod.EXIFR, sanitizeForJson(data) ?? {}, {
-      gps: extractGpsFromExifr(data),
-      hasCamera: hasCameraInfo(data),
-    });
+    return buildSuccessResult(
+      MetadataMethod.EXIFR,
+      sanitizeForJson(data) ?? {},
+      {
+        gps: extractGpsFromExifr(data),
+        hasCamera: hasCameraInfo(data),
+      },
+    );
   } catch (error) {
     return buildErrorResult(MetadataMethod.EXIFR, error.message);
   }
@@ -285,7 +289,9 @@ function extractTagNumber(tag) {
     return null;
   }
 
-  return parseCoordinateValue(tag.computed ?? tag.value ?? tag.description ?? tag);
+  return parseCoordinateValue(
+    tag.computed ?? tag.value ?? tag.description ?? tag,
+  );
 }
 
 function parseCoordinateValue(value) {
