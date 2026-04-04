@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect } from "react";
-import { Routes, Route, Link } from "react-router-dom";
+import { Routes, Route, Link, useLocation } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 import Header from "./components/Header.jsx";
 import Footer from "./components/Footer.jsx";
 import { loadAllFonts } from "./utils/fontLoader.js";
@@ -43,30 +44,56 @@ const WatermarkTool = lazy(() => import("./pages/WatermarkTool.jsx"));
 const BackgroundRemover = lazy(() => import("./pages/BackgroundRemover.jsx"));
 
 function NotFound() {
+  const location = useLocation();
+
   return (
-    <div className="flex-1 flex items-center justify-center animate-fade-in">
-      <div className="flex flex-col items-center gap-4 text-center px-4">
+    <div className="flex-1 flex items-center justify-center px-4 py-14 animate-fade-in">
+      <div className="w-full max-w-3xl px-4 sm:px-6 text-center">
+        <div
+          className="inline-flex items-center rounded-full border px-3 py-1 text-xs mb-5"
+          style={{
+            borderColor: "rgba(76, 110, 245, 0.2)",
+            backgroundColor: "rgba(76, 110, 245, 0.06)",
+            color: "var(--color-primary-700)",
+          }}
+        >
+          {location.pathname}
+        </div>
+
         <h1
-          className="text-6xl font-bold m-0"
-          style={{ color: "var(--text-primary)" }}
+          className="text-[4.8rem] sm:text-[6.4rem] leading-none m-0"
+          style={{
+            color: "var(--text-primary)",
+            fontFamily: '"DatatypeHero", "SpaceGrotesk", sans-serif',
+          }}
         >
           404
         </h1>
-        <p className="text-lg m-0" style={{ color: "var(--text-secondary)" }}>
-          Page not found
-        </p>
-        <p className="text-sm m-0" style={{ color: "var(--text-tertiary)" }}>
-          The page you're looking for doesn't exist or has been moved.
-        </p>
-        <Link
-          to="/"
-          className="mt-2 px-5 py-2.5 rounded-lg text-sm font-medium no-underline transition-colors"
+
+        <p
+          className="text-2xl sm:text-3xl mt-3 mb-2"
           style={{
-            backgroundColor: "var(--color-primary-500)",
-            color: "#fff",
+            color: "var(--text-primary)",
+            fontFamily: '"DMSansBrand", "SpaceGrotesk", sans-serif',
           }}
         >
-          Back to Home
+          Route not found
+        </p>
+
+        <p
+          className="text-sm sm:text-base max-w-xl mx-auto mb-6 leading-7"
+          style={{ color: "var(--text-tertiary)" }}
+        >
+          This path is not available in the current build. Check the URL or return to the homepage to open another tool.
+        </p>
+
+        <Link
+          to="/"
+          className="inline-flex items-center gap-2 text-sm font-medium no-underline"
+          style={{ color: "var(--color-primary-700)" }}
+        >
+          <ArrowLeft size={16} />
+          <span>Return home</span>
         </Link>
       </div>
     </div>
