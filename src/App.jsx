@@ -22,6 +22,25 @@ const SvgConverter = lazy(() => import("./pages/SvgConverter.jsx"));
 const LowResGenerator = lazy(() => import("./pages/LowResGenerator.jsx"));
 const OcrReader = lazy(() => import("./pages/OcrReader.jsx"));
 const AppIconGenerator = lazy(() => import("./pages/AppIconGenerator.jsx"));
+const ImageToAsciiConverter = lazy(
+  () => import("./pages/ImageToAsciiConverter.jsx"),
+);
+const ImageToPixelConverter = lazy(
+  () => import("./pages/ImageToPixelConverter.jsx"),
+);
+const ColorPaletteExtractor = lazy(
+  () => import("./pages/ColorPaletteExtractor.jsx"),
+);
+const ImageToEmojiMosaic = lazy(() => import("./pages/ImageToEmojiMosaic.jsx"));
+const ImageToLineArt = lazy(() => import("./pages/ImageToLineArt.jsx"));
+const ImageToAnsiArt = lazy(() => import("./pages/ImageToAnsiArt.jsx"));
+const ImageUpscaler = lazy(() => import("./pages/ImageUpscaler.jsx"));
+const HtmlToImage = lazy(() => import("./pages/HtmlToImage.jsx"));
+const FaceBlurTool = lazy(() => import("./pages/FaceBlurTool.jsx"));
+const AdvancedCropper = lazy(() => import("./pages/AdvancedCropper.jsx"));
+const MemeGenerator = lazy(() => import("./pages/MemeGenerator.jsx"));
+const WatermarkTool = lazy(() => import("./pages/WatermarkTool.jsx"));
+const BackgroundRemover = lazy(() => import("./pages/BackgroundRemover.jsx"));
 
 function NotFound() {
   return (
@@ -112,6 +131,25 @@ export default function App() {
             <Route path="/lowres-generator" element={<LowResGenerator />} />
             <Route path="/ocr-reader" element={<OcrReader />} />
             <Route path="/app-icon-generator" element={<AppIconGenerator />} />
+            <Route path="/image-to-ascii" element={<ImageToAsciiConverter />} />
+            <Route path="/image-to-pixel" element={<ImageToPixelConverter />} />
+            <Route
+              path="/color-palette-extractor"
+              element={<ColorPaletteExtractor />}
+            />
+            <Route
+              path="/image-to-emoji-mosaic"
+              element={<ImageToEmojiMosaic />}
+            />
+            <Route path="/image-to-line-art" element={<ImageToLineArt />} />
+            <Route path="/image-to-ansi-art" element={<ImageToAnsiArt />} />
+            <Route path="/image-upscaler" element={<ImageUpscaler />} />
+            <Route path="/html-to-image" element={<HtmlToImage />} />
+            <Route path="/face-blur" element={<FaceBlurTool />} />
+            <Route path="/advanced-cropper" element={<AdvancedCropper />} />
+            <Route path="/meme-generator" element={<MemeGenerator />} />
+            <Route path="/watermark-tool" element={<WatermarkTool />} />
+            <Route path="/background-remover" element={<BackgroundRemover />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>
