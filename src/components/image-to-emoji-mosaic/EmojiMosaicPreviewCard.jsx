@@ -69,10 +69,11 @@ export default function EmojiMosaicPreviewCard({
         previewModeOptions={previewModeOptions}
       />
 
-      <EmojiMosaicViewport
-        background={background}
-        imageSrc={imageSrc}
-        mosaic={mosaic}
+        <EmojiMosaicViewport
+          background={background}
+          imageSrc={imageSrc}
+          isDragging={isDragging}
+          mosaic={mosaic}
         onDrop={(event) => {
           event.preventDefault();
           setIsDragging(false);
