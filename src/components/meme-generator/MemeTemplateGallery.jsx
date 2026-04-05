@@ -1,4 +1,5 @@
-import { Upload } from "lucide-react";
+import { ChevronDown, Upload } from "lucide-react";
+import { useState } from "react";
 import memeTemplates from "../../content/memeTemplates.js";
 import { visuallyHiddenInputStyle } from "../../utils/meme-generator/editorHelpers.js";
 
@@ -54,9 +55,11 @@ export default function MemeTemplateGallery({
   onOpenTemplateImagePicker,
   onSelectTemplate,
 }) {
+  const [isMobileExpanded, setIsMobileExpanded] = useState(false);
+
   return (
     <div
-      className="rounded-xl border p-4 space-y-4 w-full max-w-[340px] mx-auto xl:sticky xl:top-6"
+      className="rounded-xl border p-4 space-y-4 w-full max-w-none mx-auto xl:sticky xl:top-6 xl:max-w-[340px]"
       style={{
         borderColor: "var(--border-color)",
         backgroundColor: "var(--card-bg)",
@@ -74,6 +77,27 @@ export default function MemeTemplateGallery({
           {memeTemplates.length} built-in
         </span>
       </div>
+
+      <button
+        type="button"
+        onClick={() => setIsMobileExpanded((current) => !current)}
+        className="xl:hidden w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg border text-left cursor-pointer"
+        style={{
+          borderColor: "var(--border-color)",
+          backgroundColor: "var(--bg-tertiary)",
+          color: "var(--text-primary)",
+        }}
+      >
+        <span className="text-sm font-medium">Template selections</span>
+        <ChevronDown
+          size={16}
+          className="transition-transform"
+          style={{
+            color: "var(--text-tertiary)",
+            transform: isMobileExpanded ? "rotate(180deg)" : "rotate(0deg)",
+          }}
+        />
+      </button>
 
       <button
         type="button"
@@ -97,25 +121,29 @@ export default function MemeTemplateGallery({
         onChange={onTemplateInputChange}
       />
 
-      <div className="space-y-3 max-h-[820px] overflow-y-auto pr-1">
-        {customTemplate && (
-          <TemplateCard
-            template={customTemplate}
-            isSelected={selectedTemplateSrc === customTemplate.src}
-            subtitle="Uploaded image template"
-            onSelect={onSelectTemplate}
-          />
-        )}
+      <div
+        className={`${isMobileExpanded ? "block" : "hidden"} xl:block`}
+      >
+        <div className="space-y-3 max-h-[820px] overflow-y-auto pr-1">
+          {customTemplate && (
+            <TemplateCard
+              template={customTemplate}
+              isSelected={selectedTemplateSrc === customTemplate.src}
+              subtitle="Uploaded image template"
+              onSelect={onSelectTemplate}
+            />
+          )}
 
-        {memeTemplates.map((template) => (
-          <TemplateCard
-            key={template.id}
-            template={template}
-            isSelected={selectedTemplateSrc === template.src}
-            subtitle="Classic meme template"
-            onSelect={onSelectTemplate}
-          />
-        ))}
+          {memeTemplates.map((template) => (
+            <TemplateCard
+              key={template.id}
+              template={template}
+              isSelected={selectedTemplateSrc === template.src}
+              subtitle="Classic meme template"
+              onSelect={onSelectTemplate}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );
