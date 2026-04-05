@@ -1,4 +1,5 @@
 import { Download, Loader2, Upload, X } from "lucide-react";
+import CreatorSelect from "../creator/CreatorSelect.jsx";
 import { HIDDEN_INPUT_STYLE } from "../../utils/background-remover/backgroundRemovalConstants.js";
 
 export default function BackgroundRemoverOutputPanel({
@@ -21,32 +22,12 @@ export default function BackgroundRemoverOutputPanel({
 }) {
   return (
     <div className="space-y-4">
-      <div>
-        <label
-          className="block text-sm font-medium mb-2"
-          style={{ color: "var(--text-secondary)" }}
-        >
-          Background Output
-        </label>
-        <select
-          value={settings.backgroundMode}
-          onChange={(event) =>
-            onUpdateSetting("backgroundMode", event.target.value)
-          }
-          className="w-full px-3 py-2 rounded-lg border outline-none"
-          style={{
-            borderColor: "var(--border-color)",
-            backgroundColor: "var(--input-bg)",
-            color: "var(--text-primary)",
-          }}
-        >
-          {backgroundModes.map(([value, label]) => (
-            <option key={value} value={value}>
-              {label}
-            </option>
-          ))}
-        </select>
-      </div>
+      <CreatorSelect
+        label="Background Output"
+        value={settings.backgroundMode}
+        options={backgroundModes.map(([value, label]) => ({ value, label }))}
+        onChange={(value) => onUpdateSetting("backgroundMode", value)}
+      />
 
       {settings.backgroundMode === "color" && (
         <input
