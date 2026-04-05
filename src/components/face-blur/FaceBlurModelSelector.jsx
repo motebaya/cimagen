@@ -1,3 +1,6 @@
+import CreatorMethodCategoryButtons from "../creator/CreatorMethodCategoryButtons.jsx";
+import CreatorSelect from "../creator/CreatorSelect.jsx";
+
 export default function FaceBlurModelSelector({ modelState }) {
   const {
     tiers,
@@ -15,36 +18,11 @@ export default function FaceBlurModelSelector({ modelState }) {
   return (
     <div className="space-y-4">
       <div>
-        <label
-          className="block text-sm font-medium mb-2"
-          style={{ color: "var(--text-secondary)" }}
-        >
-          Method Category
-        </label>
-        <div className="grid grid-cols-2 gap-2">
-          {tiers.map((tier) => {
-            const isSelected = tier.id === selectedTier;
-            return (
-              <button
-                key={tier.id}
-                type="button"
-                onClick={() => setSelectedTier(tier.id)}
-                className="px-3 py-2 rounded-lg text-sm font-medium cursor-pointer border text-left"
-                style={{
-                  borderColor: isSelected
-                    ? "var(--color-primary-600)"
-                    : "var(--border-color)",
-                  backgroundColor: isSelected
-                    ? "var(--color-primary-600)"
-                    : "var(--bg-tertiary)",
-                  color: isSelected ? "#fff" : "var(--text-secondary)",
-                }}
-              >
-                {tier.label}
-              </button>
-            );
-          })}
-        </div>
+        <CreatorMethodCategoryButtons
+          options={tiers}
+          selectedValue={selectedTier}
+          onChange={setSelectedTier}
+        />
         <p
           className="text-xs mt-2 m-0"
           style={{ color: "var(--text-tertiary)" }}
@@ -53,30 +31,16 @@ export default function FaceBlurModelSelector({ modelState }) {
         </p>
       </div>
 
-      <div>
-        <label
-          className="block text-sm font-medium mb-2"
-          style={{ color: "var(--text-secondary)" }}
-        >
-          Detection Method
-        </label>
-        <select
-          value={selectedModelId || ""}
-          onChange={(event) => setSelectedModelId(event.target.value)}
-          className="w-full px-3 py-2 rounded-lg border outline-none"
-          style={{
-            borderColor: "var(--border-color)",
-            backgroundColor: "var(--input-bg)",
-            color: "var(--text-primary)",
-          }}
-        >
-          {filteredModels.map((model) => (
-            <option key={model.id} value={model.id}>
-              {model.label}
-            </option>
-          ))}
-        </select>
-      </div>
+      <CreatorSelect
+        label="Detection Method"
+        value={selectedModelId || ""}
+        options={filteredModels.map((model) => ({
+          value: model.id,
+          label: model.label,
+          description: model.recommendedFor,
+        }))}
+        onChange={setSelectedModelId}
+      />
 
       {selectedModel && (
         <div
