@@ -3,7 +3,7 @@ import { ImageIcon } from "lucide-react";
 export default function MemeEmptyState() {
   return (
     <div
-      className="min-h-[560px] rounded-xl border-2 border-dashed flex items-center justify-center px-6 text-center"
+      className="aspect-square sm:aspect-auto min-h-0 sm:min-h-[560px] rounded-xl border-2 border-dashed flex items-center justify-center px-6 text-center"
       style={{
         borderColor: "var(--border-color)",
         backgroundColor: "var(--bg-tertiary)",
