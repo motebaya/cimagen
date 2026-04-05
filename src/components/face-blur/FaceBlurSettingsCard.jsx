@@ -1,3 +1,5 @@
+import CreatorCheckbox from "../creator/CreatorCheckbox.jsx";
+import CreatorSelect from "../creator/CreatorSelect.jsx";
 import FaceBlurModelSelector from "./FaceBlurModelSelector.jsx";
 import FaceBlurRangeField from "./FaceBlurRangeField.jsx";
 
@@ -80,55 +82,19 @@ export default function FaceBlurSettingsCard({
         className="grid grid-cols-2 gap-4 pt-1 border-t"
         style={{ borderColor: "var(--border-color)" }}
       >
-        <div>
-          <label
-            className="block text-sm font-medium mb-2"
-            style={{ color: "var(--text-secondary)" }}
-          >
-            Blur Method
-          </label>
-          <select
-            value={settings.effect}
-            onChange={(event) => onUpdateSetting("effect", event.target.value)}
-            className="w-full px-3 py-2 rounded-lg border outline-none"
-            style={{
-              borderColor: "var(--border-color)",
-              backgroundColor: "var(--input-bg)",
-              color: "var(--text-primary)",
-            }}
-          >
-            {effectOptions.map(([value, label]) => (
-              <option key={value} value={value}>
-                {label}
-              </option>
-            ))}
-          </select>
-        </div>
+        <CreatorSelect
+          label="Blur Method"
+          value={settings.effect}
+          options={effectOptions.map(([value, label]) => ({ value, label }))}
+          onChange={(value) => onUpdateSetting("effect", value)}
+        />
 
-        <div>
-          <label
-            className="block text-sm font-medium mb-2"
-            style={{ color: "var(--text-secondary)" }}
-          >
-            Mask Shape
-          </label>
-          <select
-            value={settings.shape}
-            onChange={(event) => onUpdateSetting("shape", event.target.value)}
-            className="w-full px-3 py-2 rounded-lg border outline-none"
-            style={{
-              borderColor: "var(--border-color)",
-              backgroundColor: "var(--input-bg)",
-              color: "var(--text-primary)",
-            }}
-          >
-            {shapeOptions.map(([value, label]) => (
-              <option key={value} value={value}>
-                {label}
-              </option>
-            ))}
-          </select>
-        </div>
+        <CreatorSelect
+          label="Mask Shape"
+          value={settings.shape}
+          options={shapeOptions.map(([value, label]) => ({ value, label }))}
+          onChange={(value) => onUpdateSetting("shape", value)}
+        />
       </div>
 
       <FaceBlurRangeField
@@ -165,22 +131,12 @@ export default function FaceBlurSettingsCard({
       />
 
       <div className="grid grid-cols-2 gap-3">
-        <label
-          className="flex items-center gap-2 rounded-lg border px-3 py-2 cursor-pointer"
-          style={{
-            borderColor: "var(--border-color)",
-            color: "var(--text-secondary)",
-          }}
-        >
-          <input
-            type="checkbox"
-            checked={settings.showBoxes}
-            onChange={(event) =>
-              onUpdateSetting("showBoxes", event.target.checked)
-            }
-          />
-          <span className="text-sm">Show face boxes</span>
-        </label>
+        <CreatorCheckbox
+          checked={settings.showBoxes}
+          compact
+          label="Show face boxes"
+          onChange={(value) => onUpdateSetting("showBoxes", value)}
+        />
         <button
           type="button"
           onClick={() => onSetAllFacesActive(true)}
