@@ -1,3 +1,4 @@
+import CreatorMethodCategoryButtons from "../creator/CreatorMethodCategoryButtons.jsx";
 import UpscalerSelect from "./UpscalerSelect.jsx";
 
 export default function UpscalerModelSelector({ modelState }) {
@@ -17,36 +18,11 @@ export default function UpscalerModelSelector({ modelState }) {
   return (
     <div className="space-y-4">
       <div>
-        <label
-          className="block text-sm font-medium mb-2"
-          style={{ color: "var(--text-secondary)" }}
-        >
-          Method Category
-        </label>
-        <div className="grid grid-cols-2 gap-2">
-          {tiers.map((tier) => {
-            const isSelected = tier.id === selectedTier;
-            return (
-              <button
-                key={tier.id}
-                type="button"
-                onClick={() => setSelectedTier(tier.id)}
-                className="px-3 py-2 rounded-lg text-sm font-medium cursor-pointer border text-left"
-                style={{
-                  borderColor: isSelected
-                    ? "var(--color-primary-600)"
-                    : "var(--border-color)",
-                  backgroundColor: isSelected
-                    ? "var(--color-primary-600)"
-                    : "var(--bg-tertiary)",
-                  color: isSelected ? "#fff" : "var(--text-secondary)",
-                }}
-              >
-                {tier.label}
-              </button>
-            );
-          })}
-        </div>
+        <CreatorMethodCategoryButtons
+          options={tiers}
+          selectedValue={selectedTier}
+          onChange={setSelectedTier}
+        />
         <p
           className="text-xs mt-2 m-0"
           style={{ color: "var(--text-tertiary)" }}
