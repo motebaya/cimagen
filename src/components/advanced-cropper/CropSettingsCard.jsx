@@ -1,3 +1,5 @@
+import CreatorCheckbox from "../creator/CreatorCheckbox.jsx";
+import CreatorSelect from "../creator/CreatorSelect.jsx";
 import CropToolbar from "./CropToolbar.jsx";
 import RangeField from "./RangeField.jsx";
 
@@ -41,30 +43,12 @@ export default function CropSettingsCard({
       )}
 
       <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label
-            className="block text-sm font-medium mb-2"
-            style={{ color: "var(--text-secondary)" }}
-          >
-            Crop Shape
-          </label>
-          <select
-            value={settings.shape}
-            onChange={(event) => onUpdateSetting("shape", event.target.value)}
-            className="w-full px-3 py-2 rounded-lg border outline-none"
-            style={{
-              borderColor: "var(--border-color)",
-              backgroundColor: "var(--input-bg)",
-              color: "var(--text-primary)",
-            }}
-          >
-            {shapeOptions.map(([value, label]) => (
-              <option key={value} value={value}>
-                {label}
-              </option>
-            ))}
-          </select>
-        </div>
+        <CreatorSelect
+          label="Crop Shape"
+          value={settings.shape}
+          options={shapeOptions.map(([value, label]) => ({ value, label }))}
+          onChange={(value) => onUpdateSetting("shape", value)}
+        />
 
         <div>
           <label
@@ -144,21 +128,13 @@ export default function CropSettingsCard({
           ["showSafeArea", "Show safe area"],
           ["transparentBackground", "Transparent background"],
         ].map(([key, label]) => (
-          <label
+          <CreatorCheckbox
             key={key}
-            className="flex items-center gap-2 rounded-lg border px-3 py-2 cursor-pointer"
-            style={{
-              borderColor: "var(--border-color)",
-              color: "var(--text-secondary)",
-            }}
-          >
-            <input
-              type="checkbox"
-              checked={settings[key]}
-              onChange={() => onToggleSetting(key)}
-            />
-            <span className="text-sm">{label}</span>
-          </label>
+            checked={settings[key]}
+            compact
+            label={label}
+            onChange={() => onToggleSetting(key)}
+          />
         ))}
       </div>
 
