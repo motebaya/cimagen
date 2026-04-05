@@ -3,6 +3,7 @@ import EmojiEmptyState from "./EmojiEmptyState.jsx";
 export default function EmojiMosaicViewport({
   background,
   imageSrc,
+  isDragging,
   mosaic,
   onDrop,
   onOpenImagePicker,
@@ -14,10 +15,10 @@ export default function EmojiMosaicViewport({
 }) {
   if (!imageSrc) {
     return (
-      <EmojiEmptyState
-        isDragging={false}
-        onDrop={onDrop}
-        onOpenImagePicker={onOpenImagePicker}
+        <EmojiEmptyState
+          isDragging={isDragging}
+          onDrop={onDrop}
+          onOpenImagePicker={onOpenImagePicker}
         onDragOver={onDragOver}
         onDragLeave={onDragLeave}
       />
