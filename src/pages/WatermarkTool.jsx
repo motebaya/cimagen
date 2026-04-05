@@ -15,6 +15,9 @@ import {
   Type,
   Upload,
 } from "lucide-react";
+import CreatorCheckbox from "../components/creator/CreatorCheckbox.jsx";
+import CreatorSelect from "../components/creator/CreatorSelect.jsx";
+import CreatorUploadDropzone from "../components/creator/CreatorUploadDropzone.jsx";
 import WatermarkImageStrip from "../components/watermark/WatermarkImageStrip.jsx";
 import WatermarkSelectionOverlay from "../components/watermark/WatermarkSelectionOverlay.jsx";
 import WatermarkTemplatePreview from "../components/watermark/WatermarkTemplatePreview.jsx";
@@ -52,6 +55,7 @@ export default function WatermarkTool() {
   const [selectedLayerId, setSelectedLayerId] = useState(null);
   const [selectionVisible, setSelectionVisible] = useState(true);
   const [guides, setGuides] = useState(null);
+  const [previewMaxDimension, setPreviewMaxDimension] = useState(980);
   const [format, setFormat] = useState("png");
   const [quality, setQuality] = useState(0.92);
   const [scaleMultiplier, setScaleMultiplier] = useState(1);
@@ -114,6 +118,33 @@ export default function WatermarkTool() {
   }, []);
 
   useEffect(() => {
+    const node = previewAreaRef.current;
+
+    if (!node) {
+      return undefined;
+    }
+
+    const updatePreviewMaxDimension = () => {
+      const nextDimension = Math.max(280, Math.floor(node.clientWidth - 24));
+
+      setPreviewMaxDimension((current) =>
+        current === nextDimension ? current : nextDimension,
+      );
+    };
+
+    updatePreviewMaxDimension();
+
+    if (typeof ResizeObserver !== "undefined") {
+      const observer = new ResizeObserver(updatePreviewMaxDimension);
+      observer.observe(node);
+      return () => observer.disconnect();
+    }
+
+    window.addEventListener("resize", updatePreviewMaxDimension);
+    return () => window.removeEventListener("resize", updatePreviewMaxDimension);
+  }, []);
+
+  useEffect(() => {
     if (!imageSrc) {
       setRendered(null);
       return;
@@ -124,7 +155,7 @@ export default function WatermarkTool() {
     setError(null);
 
     renderWatermarkLayers(imageSrc, layers, {
-      previewMaxDimension: 980,
+      previewMaxDimension,
       selectedLayerId,
       hideSelectedLayer: selectionVisible,
       showGrid,
@@ -150,7 +181,14 @@ export default function WatermarkTool() {
     return () => {
       active = false;
     };
-  }, [imageSrc, layers, selectedLayerId, selectionVisible, showGrid]);
+  }, [
+    imageSrc,
+    layers,
+    previewMaxDimension,
+    selectedLayerId,
+    selectionVisible,
+    showGrid,
+  ]);
 
   const updateLayer = (layerId, patch) => {
     setLayers((current) =>
@@ -503,65 +541,35 @@ export default function WatermarkTool() {
               }}
             >
               {!imageSrc ? (
-                <div
-                  onClick={() => imageInputRef.current?.click()}
+                <CreatorUploadDropzone
+                  isDragging={isDragging}
+                  desktopMinHeightClass="sm:min-h-[520px]"
+                  dragIcon={Upload}
+                  idleIcon={Upload}
+                  onOpenImagePicker={() => imageInputRef.current?.click()}
                   onDrop={(event) => {
                     event.preventDefault();
                     setIsDragging(false);
-                    handleBaseImages(
-                      Array.from(event.dataTransfer.files || []),
-                    );
+                    handleBaseImages(Array.from(event.dataTransfer.files || []));
                   }}
                   onDragOver={(event) => {
                     event.preventDefault();
                     setIsDragging(true);
                   }}
                   onDragLeave={() => setIsDragging(false)}
-                  className="relative flex flex-col items-center justify-center gap-3 p-8 rounded-xl border-2 border-dashed cursor-pointer transition-all min-h-[520px]"
-                  style={{
-                    borderColor: isDragging
-                      ? "var(--color-primary-500)"
-                      : "var(--border-color)",
-                    backgroundColor: isDragging
-                      ? "rgba(92, 124, 250, 0.05)"
-                      : "var(--bg-tertiary)",
-                  }}
-                >
-                  <div
-                    className="w-12 h-12 rounded-full flex items-center justify-center"
-                    style={{ backgroundColor: "var(--bg-secondary)" }}
-                  >
-                    <Upload
-                      size={22}
-                      style={{ color: "var(--text-tertiary)" }}
-                    />
-                  </div>
-                  <div className="text-center">
-                    <p
-                      className="text-sm font-medium m-0"
-                      style={{ color: "var(--text-secondary)" }}
-                    >
-                      Upload one or many base images to start editing
-                    </p>
-                    <p
-                      className="text-xs mt-1 m-0"
-                      style={{ color: "var(--text-tertiary)" }}
-                    >
-                      PNG, JPG, WEBP supported. Multiple images enable batch
-                      workflow.
-                    </p>
-                  </div>
-                </div>
+                  title="Upload one or many base images to start editing"
+                  description="PNG, JPG, WEBP supported. Multiple images enable batch workflow."
+                />
               ) : (
-                <div className="relative overflow-auto max-w-full flex justify-center">
+                <div className="relative max-w-full flex justify-center">
                   <div className="relative inline-block mx-auto">
                     <canvas
                       ref={baseCanvasRef}
-                      className="block absolute inset-0"
+                      className="block absolute inset-0 w-full h-full"
                     />
                     <canvas
                       ref={watermarkCanvasRef}
-                      className="block relative"
+                      className="block relative max-w-full h-auto"
                     />
                     <WatermarkSelectionOverlay
                       width={rendered?.baseLayer?.width || 0}
@@ -634,7 +642,10 @@ export default function WatermarkTool() {
                           color: "var(--text-secondary)",
                         }}
                       >
-                        {showGrid ? "Hide Grid" : "Show Grid"}
+                        <span className="inline-flex items-center gap-2">
+                          <Layers3 size={14} />
+                          <span>{showGrid ? "Hide Grid" : "Show Grid"}</span>
+                        </span>
                       </button>
                       <button
                         onClick={duplicateLayer}
@@ -646,7 +657,10 @@ export default function WatermarkTool() {
                           color: "var(--text-secondary)",
                         }}
                       >
-                        Duplicate Layer
+                        <span className="inline-flex items-center gap-2">
+                          <Copy size={14} />
+                          <span>Duplicate Layer</span>
+                        </span>
                       </button>
                       <button
                         onClick={exportSingle}
@@ -654,7 +668,10 @@ export default function WatermarkTool() {
                         className="px-3 py-2 rounded-lg text-sm font-medium cursor-pointer border-none text-white disabled:opacity-50"
                         style={{ backgroundColor: "var(--color-primary-600)" }}
                       >
-                        {isExporting ? "Exporting..." : "Export Image"}
+                        <span className="inline-flex items-center gap-2">
+                          <Download size={14} />
+                          <span>{isExporting ? "Exporting..." : "Export Image"}</span>
+                        </span>
                       </button>
                     </div>
                   </div>
@@ -665,15 +682,28 @@ export default function WatermarkTool() {
 
           <div className="space-y-4">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
-              {imageSrc && (
-                <div
-                  className="rounded-xl border p-4 space-y-4"
-                  style={{
-                    borderColor: "var(--border-color)",
-                    backgroundColor: "var(--card-bg)",
-                    boxShadow: "var(--card-shadow)",
-                  }}
-                >
+              <div
+                className="rounded-xl border p-4 space-y-4"
+                style={{
+                  borderColor: "var(--border-color)",
+                  backgroundColor: "var(--card-bg)",
+                  boxShadow: "var(--card-shadow)",
+                }}
+              >
+                {!imageSrc && (
+                  <div
+                    className="rounded-lg border px-3 py-3 text-sm"
+                    style={{
+                      borderColor: "var(--border-color)",
+                      backgroundColor: "var(--bg-secondary)",
+                      color: "var(--text-tertiary)",
+                    }}
+                  >
+                    Upload a base image to enable watermark templates, layer controls, and editing tools.
+                  </div>
+                )}
+
+                <fieldset disabled={!imageSrc} className={!imageSrc ? "space-y-4 opacity-60" : "space-y-4"}>
                   <div>
                     <p
                       className="text-sm font-medium mb-3"
@@ -1113,42 +1143,29 @@ export default function WatermarkTool() {
                             </div>
                           </div>
                           <div className="grid grid-cols-2 gap-4">
-                            <label
-                              className="flex items-center gap-2 rounded-lg border px-3 py-2 cursor-pointer"
-                              style={{
-                                borderColor: "var(--border-color)",
-                                color: "var(--text-secondary)",
-                              }}
-                            >
-                              <input
-                                type="checkbox"
-                                checked={selectedLayer.tiled}
-                                onChange={(event) =>
-                                  updateLayer(selectedLayer.id, {
-                                    tiled: event.target.checked,
-                                  })
-                                }
-                              />
-                              <span className="text-sm">Tiled watermark</span>
-                            </label>
-                            <select
-                              value={selectedLayer.pattern || "diagonal"}
-                              onChange={(event) =>
+                            <CreatorCheckbox
+                              checked={selectedLayer.tiled}
+                              compact
+                              label="Tiled watermark"
+                              onChange={(value) =>
                                 updateLayer(selectedLayer.id, {
-                                  pattern: event.target.value,
+                                  tiled: value,
                                 })
                               }
-                              className="w-full px-3 py-2 rounded-lg border outline-none"
-                              style={{
-                                borderColor: "var(--border-color)",
-                                backgroundColor: "var(--input-bg)",
-                                color: "var(--text-primary)",
-                              }}
-                            >
-                              <option value="grid">Grid</option>
-                              <option value="diagonal">Diagonal</option>
-                              <option value="brick">Brick</option>
-                            </select>
+                            />
+                            <CreatorSelect
+                              value={selectedLayer.pattern || "diagonal"}
+                              options={[
+                                { value: "grid", label: "Grid" },
+                                { value: "diagonal", label: "Diagonal" },
+                                { value: "brick", label: "Brick" },
+                              ]}
+                              onChange={(value) =>
+                                updateLayer(selectedLayer.id, {
+                                  pattern: value,
+                                })
+                              }
+                            />
                           </div>
                           <div className="grid grid-cols-2 gap-4">
                             <label
@@ -1230,44 +1247,26 @@ export default function WatermarkTool() {
                                   className="w-full mt-2"
                                 />
                               </label>
-                              <label
-                                className="flex items-center gap-2 rounded-lg border px-3 py-2 cursor-pointer"
-                                style={{
-                                  borderColor: "var(--border-color)",
-                                  color: "var(--text-secondary)",
-                                }}
-                              >
-                                <input
-                                  type="checkbox"
-                                  checked={selectedLayer.doubleBorder || false}
-                                  onChange={(event) =>
-                                    updateLayer(selectedLayer.id, {
-                                      doubleBorder: event.target.checked,
-                                    })
-                                  }
-                                />
-                                <span className="text-sm">Double border</span>
-                              </label>
-                              <label
-                                className="flex items-center gap-2 rounded-lg border px-3 py-2 cursor-pointer"
-                                style={{
-                                  borderColor: "var(--border-color)",
-                                  color: "var(--text-secondary)",
-                                }}
-                              >
-                                <input
-                                  type="checkbox"
-                                  checked={selectedLayer.distressed || false}
-                                  onChange={(event) =>
-                                    updateLayer(selectedLayer.id, {
-                                      distressed: event.target.checked,
-                                    })
-                                  }
-                                />
-                                <span className="text-sm">
-                                  Distressed texture
-                                </span>
-                              </label>
+                              <CreatorCheckbox
+                                checked={selectedLayer.doubleBorder || false}
+                                compact
+                                label="Double border"
+                                onChange={(value) =>
+                                  updateLayer(selectedLayer.id, {
+                                    doubleBorder: value,
+                                  })
+                                }
+                              />
+                              <CreatorCheckbox
+                                checked={selectedLayer.distressed || false}
+                                compact
+                                label="Distressed texture"
+                                onChange={(value) =>
+                                  updateLayer(selectedLayer.id, {
+                                    distressed: value,
+                                  })
+                                }
+                              />
                             </div>
                           )}
                           {(selectedLayer.templateCategory === "Social Media" ||
@@ -1384,67 +1383,47 @@ export default function WatermarkTool() {
                                 className="w-full mt-2"
                               />
                             </label>
-                            <select
+                            <CreatorSelect
+                              label="Blend Mode"
                               value={selectedLayer.blendMode || "source-over"}
-                              onChange={(event) =>
+                              options={[
+                                { value: "source-over", label: "Normal" },
+                                { value: "multiply", label: "Multiply" },
+                                { value: "overlay", label: "Overlay" },
+                                { value: "soft-light", label: "Soft Light" },
+                                { value: "hard-light", label: "Hard Light" },
+                                { value: "screen", label: "Screen" },
+                                { value: "darken", label: "Darken" },
+                                { value: "lighten", label: "Lighten" },
+                              ]}
+                              onChange={(value) =>
                                 updateLayer(selectedLayer.id, {
-                                  blendMode: event.target.value,
+                                  blendMode: value,
                                 })
                               }
-                              className="w-full px-3 py-2 rounded-lg border outline-none mt-7"
-                              style={{
-                                borderColor: "var(--border-color)",
-                                backgroundColor: "var(--input-bg)",
-                                color: "var(--text-primary)",
-                              }}
-                            >
-                              <option value="source-over">normal</option>
-                              <option value="multiply">multiply</option>
-                              <option value="overlay">overlay</option>
-                              <option value="soft-light">soft-light</option>
-                              <option value="hard-light">hard-light</option>
-                              <option value="screen">screen</option>
-                              <option value="darken">darken</option>
-                              <option value="lighten">lighten</option>
-                            </select>
+                            />
                           </div>
                           <div className="grid grid-cols-2 gap-3">
-                            <label
-                              className="flex items-center gap-2 rounded-lg border px-3 py-2 cursor-pointer"
-                              style={{
-                                borderColor: "var(--border-color)",
-                                color: "var(--text-secondary)",
-                              }}
-                            >
-                              <input
-                                type="checkbox"
-                                checked={selectedLayer.flipX || false}
-                                onChange={(event) =>
-                                  updateLayer(selectedLayer.id, {
-                                    flipX: event.target.checked,
-                                  })
-                                }
-                              />
-                              <span className="text-sm">Flip horizontal</span>
-                            </label>
-                            <label
-                              className="flex items-center gap-2 rounded-lg border px-3 py-2 cursor-pointer"
-                              style={{
-                                borderColor: "var(--border-color)",
-                                color: "var(--text-secondary)",
-                              }}
-                            >
-                              <input
-                                type="checkbox"
-                                checked={selectedLayer.flipY || false}
-                                onChange={(event) =>
-                                  updateLayer(selectedLayer.id, {
-                                    flipY: event.target.checked,
-                                  })
-                                }
-                              />
-                              <span className="text-sm">Flip vertical</span>
-                            </label>
+                            <CreatorCheckbox
+                              checked={selectedLayer.flipX || false}
+                              compact
+                              label="Flip horizontal"
+                              onChange={(value) =>
+                                updateLayer(selectedLayer.id, {
+                                  flipX: value,
+                                })
+                              }
+                            />
+                            <CreatorCheckbox
+                              checked={selectedLayer.flipY || false}
+                              compact
+                              label="Flip vertical"
+                              onChange={(value) =>
+                                updateLayer(selectedLayer.id, {
+                                  flipY: value,
+                                })
+                              }
+                            />
                           </div>
                         </div>
                       )}
@@ -1491,8 +1470,8 @@ export default function WatermarkTool() {
                       </div>
                     </fieldset>
                   )}
-                </div>
-              )}
+                </fieldset>
+              </div>
 
               <div
                 className="rounded-xl border p-4 space-y-4"
@@ -1536,20 +1515,15 @@ export default function WatermarkTool() {
                     >
                       Format
                     </label>
-                    <select
+                    <CreatorSelect
                       value={format}
-                      onChange={(event) => setFormat(event.target.value)}
-                      className="w-full px-3 py-2 rounded-lg border outline-none"
-                      style={{
-                        borderColor: "var(--border-color)",
-                        backgroundColor: "var(--input-bg)",
-                        color: "var(--text-primary)",
-                      }}
-                    >
-                      <option value="png">PNG</option>
-                      <option value="jpg">JPG</option>
-                      <option value="webp">WEBP</option>
-                    </select>
+                      options={[
+                        { value: "png", label: "PNG" },
+                        { value: "jpg", label: "JPG" },
+                        { value: "webp", label: "WEBP" },
+                      ]}
+                      onChange={setFormat}
+                    />
                   </div>
                   <div>
                     <label
@@ -1558,22 +1532,15 @@ export default function WatermarkTool() {
                     >
                       Scale
                     </label>
-                    <select
+                    <CreatorSelect
                       value={scaleMultiplier}
-                      onChange={(event) =>
-                        setScaleMultiplier(Number(event.target.value))
-                      }
-                      className="w-full px-3 py-2 rounded-lg border outline-none"
-                      style={{
-                        borderColor: "var(--border-color)",
-                        backgroundColor: "var(--input-bg)",
-                        color: "var(--text-primary)",
-                      }}
-                    >
-                      <option value={1}>1x</option>
-                      <option value={2}>2x</option>
-                      <option value={4}>4x</option>
-                    </select>
+                      options={[
+                        { value: 1, label: "1x" },
+                        { value: 2, label: "2x" },
+                        { value: 4, label: "4x" },
+                      ]}
+                      onChange={(value) => setScaleMultiplier(Number(value))}
+                    />
                   </div>
                 </div>
 
