@@ -1,3 +1,5 @@
+import CreatorCheckbox from "../creator/CreatorCheckbox.jsx";
+import CreatorSelect from "../creator/CreatorSelect.jsx";
 import { MEME_FONTS } from "../../utils/meme-generator/memeConstants.js";
 
 export default function MemeTextControls({ layer, onUpdateLayer }) {
@@ -26,57 +28,23 @@ export default function MemeTextControls({ layer, onUpdateLayer }) {
       </div>
 
       <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label
-            className="block text-sm font-medium mb-2"
-            style={{ color: "var(--text-secondary)" }}
-          >
-            Font
-          </label>
-          <select
-            value={layer.fontFamily}
-            onChange={(event) =>
-              updateCurrentLayer({ fontFamily: event.target.value })
-            }
-            className="w-full px-3 py-2 rounded-lg border outline-none"
-            style={{
-              borderColor: "var(--border-color)",
-              backgroundColor: "var(--input-bg)",
-              color: "var(--text-primary)",
-            }}
-          >
-            {MEME_FONTS.map((font) => (
-              <option key={font} value={font}>
-                {font}
-              </option>
-            ))}
-          </select>
-        </div>
+        <CreatorSelect
+          label="Font"
+          value={layer.fontFamily}
+          options={MEME_FONTS.map((font) => ({ value: font, label: font }))}
+          onChange={(value) => updateCurrentLayer({ fontFamily: value })}
+        />
 
-        <div>
-          <label
-            className="block text-sm font-medium mb-2"
-            style={{ color: "var(--text-secondary)" }}
-          >
-            Alignment
-          </label>
-          <select
-            value={layer.align}
-            onChange={(event) =>
-              updateCurrentLayer({ align: event.target.value })
-            }
-            className="w-full px-3 py-2 rounded-lg border outline-none"
-            style={{
-              borderColor: "var(--border-color)",
-              backgroundColor: "var(--input-bg)",
-              color: "var(--text-primary)",
-            }}
-          >
-            <option value="left">Left</option>
-            <option value="center">Center</option>
-            <option value="right">Right</option>
-          </select>
-        </div>
+        <CreatorSelect
+          label="Alignment"
+          value={layer.align}
+          options={[
+            { value: "left", label: "Left" },
+            { value: "center", label: "Center" },
+            { value: "right", label: "Right" },
+          ]}
+          onChange={(value) => updateCurrentLayer({ align: value })}
+        />
       </div>
 
       <div className="grid grid-cols-2 gap-4">
@@ -123,22 +91,12 @@ export default function MemeTextControls({ layer, onUpdateLayer }) {
         </div>
       </div>
 
-      <label
-        className="flex items-center gap-2 rounded-lg border px-3 py-2 cursor-pointer"
-        style={{
-          borderColor: "var(--border-color)",
-          color: "var(--text-secondary)",
-        }}
-      >
-        <input
-          type="checkbox"
-          checked={layer.autoSize}
-          onChange={(event) =>
-            updateCurrentLayer({ autoSize: event.target.checked })
-          }
-        />
-        <span className="text-sm">Auto font resize</span>
-      </label>
+      <CreatorCheckbox
+        checked={layer.autoSize}
+        compact
+        label="Auto font resize"
+        onChange={(value) => updateCurrentLayer({ autoSize: value })}
+      />
     </>
   );
 }
