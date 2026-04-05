@@ -1,4 +1,4 @@
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import {
   getPinchZoomDelta,
   getTouchDistance,
@@ -26,6 +26,32 @@ export default function useCropInteractions({
     pinchStateRef.current = null;
   };
 
+  useEffect(() => {
+    const target = previewCanvasRef.current;
+
+    if (!target || !previewInfo) {
+      return undefined;
+    }
+
+    const handleWheel = (event) => {
+      event.preventDefault();
+
+      const direction = event.deltaY > 0 ? 1 : -1;
+      const intensity = Math.min(
+        1.4,
+        Math.max(0.5, Math.abs(event.deltaY) / 120),
+      );
+
+      adjustZoom(direction * WHEEL_ZOOM_STEP * intensity);
+    };
+
+    target.addEventListener("wheel", handleWheel, { passive: false });
+
+    return () => {
+      target.removeEventListener("wheel", handleWheel);
+    };
+  }, [adjustZoom, previewCanvasRef, previewInfo]);
+
   const handlers = useMemo(
     () => ({
       onMouseDown: (event) => {
@@ -42,17 +68,6 @@ export default function useCropInteractions({
       },
       onMouseUp: clearInteraction,
       onMouseLeave: clearInteraction,
-      onWheel: (event) => {
-        if (!previewInfo) return;
-
-        event.preventDefault();
-        const direction = event.deltaY > 0 ? 1 : -1;
-        const intensity = Math.min(
-          1.4,
-          Math.max(0.5, Math.abs(event.deltaY) / 120),
-        );
-        adjustZoom(direction * WHEEL_ZOOM_STEP * intensity);
-      },
       onTouchStart: (event) => {
         if (!previewInfo) return;
 
@@ -109,7 +124,7 @@ export default function useCropInteractions({
         clearInteraction();
       },
     }),
-    [adjustZoom, previewInfo, updateOffsets],
+    [previewInfo, updateOffsets],
   );
 
   return handlers;
