@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { ImageIcon, Loader2, Upload, X } from "lucide-react";
+import CreatorUploadDropzone from "../creator/CreatorUploadDropzone.jsx";
 
 const hiddenInputStyle = {
   position: "absolute",
@@ -48,50 +49,25 @@ export default function ImagePreviewCard({
       />
 
       {!imageSrc ? (
-        <div
-          onClick={onOpenImagePicker}
+        <CreatorUploadDropzone
+          isDragging={isDragging}
+          desktopMinHeightClass="sm:min-h-[560px]"
+          dragIcon={Upload}
+          idleIcon={Upload}
+          onDragLeave={() => setIsDragging(false)}
+          onDragOver={(event) => {
+            event.preventDefault();
+            setIsDragging(true);
+          }}
           onDrop={(event) => {
             event.preventDefault();
             setIsDragging(false);
             onFileSelect(event.dataTransfer.files?.[0] || null);
           }}
-          onDragOver={(event) => {
-            event.preventDefault();
-            setIsDragging(true);
-          }}
-          onDragLeave={() => setIsDragging(false)}
-          className="relative flex flex-col items-center justify-center gap-3 p-8 min-h-[560px] border-2 border-dashed cursor-pointer transition-all"
-          style={{
-            borderColor: isDragging
-              ? "var(--color-primary-500)"
-              : "var(--border-color)",
-            backgroundColor: isDragging
-              ? "rgba(92, 124, 250, 0.05)"
-              : "var(--bg-tertiary)",
-          }}
-        >
-          <div
-            className="w-12 h-12 rounded-full flex items-center justify-center"
-            style={{ backgroundColor: "var(--bg-secondary)" }}
-          >
-            <Upload size={22} style={{ color: "var(--text-tertiary)" }} />
-          </div>
-
-          <div className="text-center">
-            <p
-              className="text-sm font-medium m-0"
-              style={{ color: "var(--text-secondary)" }}
-            >
-              Click to upload or drag and drop
-            </p>
-            <p
-              className="text-xs mt-1 m-0"
-              style={{ color: "var(--text-tertiary)" }}
-            >
-              PNG, JPG, WEBP supported (max 20MB)
-            </p>
-          </div>
-        </div>
+          onOpenImagePicker={onOpenImagePicker}
+          title="Click to upload or drag and drop"
+          description="PNG, JPG, WEBP supported (max 20MB)"
+        />
       ) : (
         <>
           <div
