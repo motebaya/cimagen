@@ -42,6 +42,7 @@ const AdvancedCropper = lazy(() => import("./pages/AdvancedCropper.jsx"));
 const MemeGenerator = lazy(() => import("./pages/MemeGenerator.jsx"));
 const WatermarkTool = lazy(() => import("./pages/WatermarkTool.jsx"));
 const BackgroundRemover = lazy(() => import("./pages/BackgroundRemover.jsx"));
+const BlueArchiveLogo = lazy(() => import("./pages/BlueArchiveLogo.jsx"));
 
 function NotFound() {
   const location = useLocation();
@@ -84,7 +85,8 @@ function NotFound() {
           className="text-sm sm:text-base max-w-xl mx-auto mb-6 leading-7"
           style={{ color: "var(--text-tertiary)" }}
         >
-          This path is not available in the current build. Check the URL or return to the homepage to open another tool.
+          This path is not available in the current build. Check the URL or
+          return to the homepage to open another tool.
         </p>
 
         <Link
@@ -177,6 +179,7 @@ export default function App() {
             <Route path="/meme-generator" element={<MemeGenerator />} />
             <Route path="/watermark-tool" element={<WatermarkTool />} />
             <Route path="/background-remover" element={<BackgroundRemover />} />
+            <Route path="/bluearchive-logo" element={<BlueArchiveLogo />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>
