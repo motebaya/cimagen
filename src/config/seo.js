@@ -82,6 +82,15 @@ export const seoConfig = {
       image: "/cimagen/images/sample-phlogo.webp",
     },
 
+    "bluearchive-logo": {
+      title: "BlueArchive Logo Generator - Browser Wordmark Tool | CimaGen",
+      description:
+        "Generate Blue Archive style logos locally in the browser with editable text, transparent mode, and adjustable halo and cross placement.",
+      keywords:
+        "blue archive logo generator, blue archive wordmark, browser logo tool, anime logo generator, blue archive text logo",
+      image: "/cimagen/images/sample_bluearchive_logo.svg",
+    },
+
     paperWriterCreator: {
       title: "Handwritten Text Generator - Paper Note Creator | CimaGen",
       description:
