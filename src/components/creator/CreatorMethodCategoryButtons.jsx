@@ -38,8 +38,12 @@ export default function CreatorMethodCategoryButtons({
               onClick={() => onChange(option.id)}
               className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium cursor-pointer border text-left"
               style={{
-                borderColor: isSelected ? "var(--color-primary-600)" : "var(--border-color)",
-                backgroundColor: isSelected ? "var(--color-primary-600)" : "var(--bg-tertiary)",
+                borderColor: isSelected
+                  ? "var(--color-primary-600)"
+                  : "var(--border-color)",
+                backgroundColor: isSelected
+                  ? "var(--color-primary-600)"
+                  : "var(--bg-tertiary)",
                 color: isSelected ? "#fff" : "var(--text-secondary)",
               }}
             >
