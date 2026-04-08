@@ -109,7 +109,9 @@ export default function CreatorSelect({
                   color: "var(--text-primary)",
                 }}
               >
-                <span className="block text-sm font-medium">{option.label}</span>
+                <span className="block text-sm font-medium">
+                  {option.label}
+                </span>
                 {option.description ? (
                   <span
                     className="block text-xs mt-0.5"
