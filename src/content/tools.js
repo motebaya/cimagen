@@ -79,6 +79,16 @@ export const tools = [
     tags: ["logo", "parody", "orange box", "meme", "brand", "generator"],
   },
   {
+    id: "bluearchive-logo",
+    title: "BlueArchive Logo Generator",
+    description:
+      "Generate the Blue Archive style wordmark locally with editable left and right text, transparent mode, and adjustable halo and cross positioning.",
+    thumbnail: `${BASE}images/sample_bluearchive_logo.webp`,
+    href: "/bluearchive-logo",
+    icon: "sparkles",
+    tags: ["blue archive", "logo", "wordmark", "anime", "generator", "canvas"],
+  },
+  {
     id: "paperwriter",
     title: "Paper Writer",
     description:
