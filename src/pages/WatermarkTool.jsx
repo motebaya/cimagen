@@ -141,7 +141,8 @@ export default function WatermarkTool() {
     }
 
     window.addEventListener("resize", updatePreviewMaxDimension);
-    return () => window.removeEventListener("resize", updatePreviewMaxDimension);
+    return () =>
+      window.removeEventListener("resize", updatePreviewMaxDimension);
   }, []);
 
   useEffect(() => {
@@ -550,7 +551,9 @@ export default function WatermarkTool() {
                   onDrop={(event) => {
                     event.preventDefault();
                     setIsDragging(false);
-                    handleBaseImages(Array.from(event.dataTransfer.files || []));
+                    handleBaseImages(
+                      Array.from(event.dataTransfer.files || []),
+                    );
                   }}
                   onDragOver={(event) => {
                     event.preventDefault();
@@ -670,7 +673,9 @@ export default function WatermarkTool() {
                       >
                         <span className="inline-flex items-center gap-2">
                           <Download size={14} />
-                          <span>{isExporting ? "Exporting..." : "Export Image"}</span>
+                          <span>
+                            {isExporting ? "Exporting..." : "Export Image"}
+                          </span>
                         </span>
                       </button>
                     </div>
@@ -699,11 +704,15 @@ export default function WatermarkTool() {
                       color: "var(--text-tertiary)",
                     }}
                   >
-                    Upload a base image to enable watermark templates, layer controls, and editing tools.
+                    Upload a base image to enable watermark templates, layer
+                    controls, and editing tools.
                   </div>
                 )}
 
-                <fieldset disabled={!imageSrc} className={!imageSrc ? "space-y-4 opacity-60" : "space-y-4"}>
+                <fieldset
+                  disabled={!imageSrc}
+                  className={!imageSrc ? "space-y-4 opacity-60" : "space-y-4"}
+                >
                   <div>
                     <p
                       className="text-sm font-medium mb-3"
