@@ -13,8 +13,12 @@ export default function CreatorCheckbox({
     <label
       className={`flex items-start gap-3 rounded-lg border cursor-pointer ${compact ? "px-3 py-2" : "px-3 py-3"} ${className}`}
       style={{
-        borderColor: checked ? "var(--color-primary-600)" : "var(--border-color)",
-        backgroundColor: checked ? "rgba(92, 124, 250, 0.05)" : "var(--bg-tertiary)",
+        borderColor: checked
+          ? "var(--color-primary-600)"
+          : "var(--border-color)",
+        backgroundColor: checked
+          ? "rgba(92, 124, 250, 0.05)"
+          : "var(--bg-tertiary)",
         opacity: disabled ? 0.58 : 1,
       }}
     >
@@ -29,7 +33,9 @@ export default function CreatorCheckbox({
       <span
         className={`mt-0.5 rounded-md border flex items-center justify-center flex-shrink-0 ${compact ? "w-[18px] h-[18px]" : "w-5 h-5"}`}
         style={{
-          borderColor: checked ? "var(--color-primary-600)" : "var(--border-color)",
+          borderColor: checked
+            ? "var(--color-primary-600)"
+            : "var(--border-color)",
           backgroundColor: checked ? "var(--color-primary-600)" : "transparent",
           color: checked ? "#fff" : "transparent",
         }}
